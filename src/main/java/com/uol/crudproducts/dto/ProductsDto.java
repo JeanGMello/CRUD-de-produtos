@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.uol.crudproducts.model.Products;
+import com.uol.crudproducts.model.Product;
 
 public class ProductsDto {
 
@@ -16,7 +16,7 @@ public class ProductsDto {
 	public ProductsDto() {
 	}
 
-	public ProductsDto(Products product) {
+	public ProductsDto(Product product) {
 		super();
 		this.id = product.getId();
 		this.name =product.getName();
@@ -56,9 +56,9 @@ public class ProductsDto {
 		this.price = price;
 	}
 	
-	public static List<ProductsDto> conversor(List<Products> products){
+	public static List<ProductsDto> conversor(List<Product> products){
 		List<ProductsDto> dtos = new ArrayList<ProductsDto>();
-		for (Products product : products) {
+		for (Product product : products) {
 			dtos.add(new ProductsDto(product));
 		}
 		return dtos;

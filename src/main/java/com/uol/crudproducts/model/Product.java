@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name= "products")
-public class Products {
+public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,14 +20,13 @@ public class Products {
 	private String description;
 	private BigDecimal price;
 	
-	public Products() {
+	public Product() {
 		
 	}
 	
 	
 	
-	public Products(Long id, String name, String description, BigDecimal price) {
-		this.id = id;
+	public Product(String name, String description, BigDecimal price) {
 		this.name = name;
 		this.description = description;
 		this.price = price;
@@ -77,7 +76,7 @@ public class Products {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Products other = (Products) obj;
+		Product other = (Product) obj;
 		return Objects.equals(description, other.description) && Objects.equals(id, other.id)
 				&& Objects.equals(name, other.name) && Objects.equals(price, other.price);
 	}
