@@ -2,11 +2,17 @@ package com.uol.crudproducts.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -30,10 +37,15 @@ public class ProductsController {
 	@Autowired
 	ProductRepository productRepository;
 
+	/*
+	 * Metodo list com paginação
+	 * navegar entre paginas: http://localhost:9999/products?pagina=0&qnt=10
+	 * */
 	@GetMapping
-	public ResponseEntity<List<ProductsDto>> list(){
-		List<Product> products = productRepository.findAll();
-		List<ProductsDto> dtos = ProductsDto.conversor(products);
+	public ResponseEntity<Page<ProductsDto>> list(@PageableDefault(page = 0, size = 10) Pageable paginacao){
+		
+		Page<Product> product = productRepository.findAll(paginacao);
+		Page<ProductsDto> dtos = ProductsDto.conversor(product);
 		return ResponseEntity.ok(dtos);
 	}
 	
@@ -47,35 +59,49 @@ public class ProductsController {
 	}
 	
 	@GetMapping("/{id}")
-	public ProductsDto findById(@PathVariable Long id){
-		Product product = productRepository.getOne(id);
-		return new ProductsDto(product);
+	public ResponseEntity<ProductsDto> findById(@PathVariable Long id){
+		Optional<Product> optional = productRepository.findById(id);
+		if(optional.isPresent()){
+			return ResponseEntity.ok(new ProductsDto(optional.get()));
+		}
+		return ResponseEntity.notFound().build();
 	}
 	
 	@PutMapping("/{id}")
 	@Transactional
 	public ResponseEntity<ProductsDto> update(@PathVariable Long id, @RequestBody @Valid ProductForm form){
-		Product product = form.atualizar(id, productRepository);
-		return ResponseEntity.ok(new ProductsDto(product));
+		Optional<Product> optional = productRepository.findById(id);
+		if(optional.isPresent()){
+			Product product = form.atualizar(id, productRepository);
+			return ResponseEntity.ok(new ProductsDto(product));
+		}
+		return ResponseEntity.notFound().build();
+		
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ProductsDto> delete(@PathVariable Long id){
-		productRepository.deleteById(id);
-		return ResponseEntity.ok().build();
+		Optional<Product> optional = productRepository.findById(id);
+		if(optional.isPresent()){
+			productRepository.deleteById(id);
+			return ResponseEntity.ok().build();
+		}
+		return ResponseEntity.notFound().build();
+	}
+
+	
+	@GetMapping("/search/maxPrice")
+	public ResponseEntity<Page<ProductsDto>> searchMax(@PageableDefault(sort = "price", direction = Direction.DESC) Pageable paginacao){
+			Page<Product> product = productRepository.findAll(paginacao);
+			Page<ProductsDto> dtos = ProductsDto.conversor(product);
+			return ResponseEntity.ok(dtos);
+	}
+	
+	@GetMapping("/search/minPrice")
+	public ResponseEntity<Page<ProductsDto>> searchMin(@PageableDefault(sort = "price", direction = Direction.ASC) Pageable paginacao){
+			Page<Product> product = productRepository.findAll(paginacao);
+			Page<ProductsDto> dtos = ProductsDto.conversor(product);
+			return ResponseEntity.ok(dtos);
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

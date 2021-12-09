@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import com.uol.crudproducts.model.Product;
 
 public class ProductsDto {
@@ -56,12 +58,8 @@ public class ProductsDto {
 		this.price = price;
 	}
 	
-	public static List<ProductsDto> conversor(List<Product> products){
-		List<ProductsDto> dtos = new ArrayList<ProductsDto>();
-		for (Product product : products) {
-			dtos.add(new ProductsDto(product));
-		}
-		return dtos;
+	public static Page<ProductsDto> conversor(Page<Product> products){
+		return products.map(ProductsDto::new);
 	}
 	
 }
