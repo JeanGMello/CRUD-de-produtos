@@ -54,7 +54,7 @@ public class ProductForm {
 		product.setName(this.name);
 		product.setDescription(this.description);
 		product.setPrice(this.price);
-		return null;
+		return product;
 	}
 	
 }
