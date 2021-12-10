@@ -1,6 +1,7 @@
 package com.uol.crudproducts.controller;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -93,19 +95,9 @@ public class ProductsController {
 		return ResponseEntity.notFound().build();
 	}
 
-	//Efetua busca por meio da filtragem do Pageable
-	@GetMapping("/search/maxPrice")
-	public ResponseEntity<Page<ProductsDto>> searchMax(@PageableDefault(sort = "price", direction = Direction.DESC) Pageable paginacao){
-			Page<Product> product = productRepository.findAll(paginacao);
-			Page<ProductsDto> dtos = ProductsDto.conversor(product);
-			return ResponseEntity.ok(dtos);
-	}
-	
-	@GetMapping("/search/minPrice")
-	public ResponseEntity<Page<ProductsDto>> searchMin(@PageableDefault(sort = "price", direction = Direction.ASC) Pageable paginacao){
-			Page<Product> product = productRepository.findAll(paginacao);
-			Page<ProductsDto> dtos = ProductsDto.conversor(product);
-			return ResponseEntity.ok(dtos);
+	@GetMapping("/search")
+	public List<Product> findBySearch(@RequestParam(required = false, value = "q") String q, @RequestParam(required = false, value = "minPrice")Double minPrice, @RequestParam(required = false, value = "maxPrice") Double maxPrice){
+		return this.productRepository.findBySearch(q, minPrice, maxPrice);
 	}
 	
 }
