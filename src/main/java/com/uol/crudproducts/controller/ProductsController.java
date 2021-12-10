@@ -1,18 +1,18 @@
 package com.uol.crudproducts.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,10 +36,9 @@ public class ProductsController {
 	@Autowired
 	ProductRepository productRepository;
 
-	/*
-	 * Metodo list com paginação
-	 * navegar entre paginas: http://localhost:9999/products?pagina=0&qnt=10
-	 * */
+	
+	 // Metodo list com paginação
+	// navegar entre paginas: http://localhost:9999/products?pagina=0&qnt=10
 	@GetMapping
 	public ResponseEntity<Page<ProductsDto>> list(@PageableDefault(page = 0, size = 10) Pageable paginacao){
 		
@@ -63,6 +61,8 @@ public class ProductsController {
 		Optional<Product> optional = productRepository.findById(id);
 		if(optional.isPresent()){
 			return ResponseEntity.ok(new ProductsDto(optional.get()));
+		}else if(optional.isEmpty()){
+			throw new EntityNotFoundException("Product with id "+id+" not found");
 		}
 		return ResponseEntity.notFound().build();
 	}
@@ -74,9 +74,11 @@ public class ProductsController {
 		if(optional.isPresent()){
 			Product product = form.atualizar(id, productRepository);
 			return ResponseEntity.ok(new ProductsDto(product));
+		}else if(optional.isEmpty()){
+			throw new EntityNotFoundException("Product with id "+id+" not found");
 		}
-		return ResponseEntity.notFound().build();
 		
+		return ResponseEntity.notFound().build();
 	}
 
 	@DeleteMapping("/{id}")
@@ -85,11 +87,13 @@ public class ProductsController {
 		if(optional.isPresent()){
 			productRepository.deleteById(id);
 			return ResponseEntity.ok().build();
+		}else if(optional.isEmpty()){
+			throw new EntityNotFoundException("Product with id "+id+" not found");
 		}
 		return ResponseEntity.notFound().build();
 	}
 
-	
+	//Efetua busca por meio da filtragem do Pageable
 	@GetMapping("/search/maxPrice")
 	public ResponseEntity<Page<ProductsDto>> searchMax(@PageableDefault(sort = "price", direction = Direction.DESC) Pageable paginacao){
 			Page<Product> product = productRepository.findAll(paginacao);
